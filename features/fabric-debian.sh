@@ -19,6 +19,12 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
+ARCHITECTURE="$(uname -m)"
+case ${ARCHITECTURE} in
+    x86_64) ARCHITECTURE="amd64";;
+    *) echo -e "Architecture ${architecture} unsupported"; exit 1 ;;
+esac
+
 # Determine the appropriate non-root user
 if [ "${USERNAME}" = "auto" ] || [ "${USERNAME}" = "automatic" ]; then
     USERNAME=""
@@ -81,31 +87,45 @@ if ! type git > /dev/null 2>&1; then
     apt-get -y install --no-install-recommends git
 fi
 
-# TODO Install Fabric
-mkdir -p /tmp/fabric
-pushd /tmp/fabric
-curl -sSLO https://raw.githubusercontent.com/hyperledger/fabric/main/scripts/install-fabric.sh && chmod +x install-fabric.sh
-/tmp/fabric/install-fabric.sh --fabric-version ${HLF_VERSION} binary
-mv ./bin/ccaas_builder ~/ccaas_builder
+# Install yq
+curl -sSLo /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.23.1/yq_linux_${ARCHITECTURE} && chmod +x /usr/local/bin/yq
+
+# Download Fabric install script
+mkdir -p /tmp/hyperledger/fabric
+curl -sSLo /tmp/hyperledger/fabric/install-fabric.sh https://raw.githubusercontent.com/hyperledger/fabric/main/scripts/install-fabric.sh && chmod +x /tmp/hyperledger/fabric/install-fabric.sh
+
+# Install Fabric binaries and config
+FABRIC_CFG_PATH=/opt/hyperledger/fabric/config
+pushd /tmp/hyperledger/fabric
+./install-fabric.sh --fabric-version ${HLF_VERSION} binary
+mkdir -p /opt/hyperledger/fabric
+mv ./bin/ccaas_builder /opt/hyperledger/fabric
 mkdir -p /usr/local/bin
 mv ./bin/* /usr/local/bin
 mkdir -p /etc/hyperledger/fabric
-mv ./config /etc/hyperledger/fabric
+mv ./config/* ${FABRIC_CFG_PATH}
 popd
 
-mkdir -p /usr/src/hyperledger
-pushd /usr/src/hyperledger
-/tmp/fabric/install-fabric.sh --fabric-version ${HLF_VERSION} samples
+# Install Fabric samples
+if [ "${USERNAME}" = "root" ]; then
+    FABRIC_SAMPLES_PARENT=/usr/local/src/github.com/hyperledger
+else
+    FABRIC_SAMPLES_PARENT=/home/${USERNAME}
+fi
+mkdir -p ${FABRIC_SAMPLES_PARENT}
+pushd ${FABRIC_SAMPLES_PARENT}
+/tmp/hyperledger/fabric/install-fabric.sh --fabric-version ${HLF_VERSION} samples
 ln -s /usr/local/bin ./fabric-samples/bin && ln -s /etc/hyperledger/fabric/config ./fabric-samples/config
 popd
 
-rm -Rf /tmp/fabric
+# Clean up Fabric install script
+rm -Rf /tmp/hyperledger/fabric
 
-# TODO install microfab?!
-#     && mkdir -p /opt/microfab/bin /opt/microfab/data \
-#     && chgrp -R root /opt/microfab/data \
-#     && chmod -R g=u /opt/microfab/data \
-#     && go build -o /opt/microfab/bin/microfabd cmd/microfabd/main.go \
-#     && cp -rf builders /opt/microfab/builders
+# Configure ccaas builder
+yq -yi 'del(.vm.endpoint) | .chaincode.externalBuilders += { "name": "ccaas_builder", "path": "/opt/hyperledger/fabric/ccaas_builder", "propagateEnvironment": [ "CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG" ] }' ${FABRIC_CFG_PATH}/core.yaml
 
-# TODO install ccaas builder
+# TODO install microfab!
+
+if [ "${USERNAME}" != "root" ]; then
+    chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}
+fi
