@@ -9,6 +9,7 @@ ENABLE_NONROOT=${1:-"true"}
 USERNAME=${2:-"automatic"}
 HLF_VERSION=${3:-"latest"}
 
+# TODO non-root?
 echo "FAB ${HLF_VERSION}"
 
 set -e
@@ -56,26 +57,45 @@ check_packages() {
 
 export DEBIAN_FRONTEND=noninteractive
 
-# Install curl, apt-transport-https, curl, gpg, or dirmngr, git if missing (TBC!)
-check_packages curl ca-certificates apt-transport-https dirmngr gnupg2
+# TODO Install couch?!
+# sudo apt update && sudo apt install -y curl apt-transport-https gnupg
+# curl https://couchdb.apache.org/repo/keys.asc | gpg --dearmor | sudo tee /usr/share/keyrings/couchdb-archive-keyring.gpg >/dev/null 2>&1
+# source /etc/os-release
+# echo "deb [signed-by=/usr/share/keyrings/couchdb-archive-keyring.gpg] https://apache.jfrog.io/artifactory/couchdb-deb/ ${VERSION_CODENAME} main" \
+#     | sudo tee /etc/apt/sources.list.d/couchdb.list >/dev/null
+
+# Install required packages if missing (TBC!)
+check_packages curl ca-certificates apt-transport-https dirmngr gnupg2 findutils gcc gcc-c++ git gzip make python3 tar unzip xz
 if ! type git > /dev/null 2>&1; then
     apt_get_update_if_needed
     apt-get -y install --no-install-recommends git
 fi
 
-if [ "${USERNAME}" != "root" ]; then
-    mkdir -p /home/${USERNAME}/hyperledger
-    pushd /home/${USERNAME}/hyperledger
-else
-    mkdir -p /usr/src/hyperledger
-    pushd /usr/src/hyperledger
-fi
-
+# TODO Install Fabric
+mkdir -p /tmp/fabric
+pushd /tmp/fabric
 curl -sSLO https://raw.githubusercontent.com/hyperledger/fabric/main/scripts/install-fabric.sh && chmod +x install-fabric.sh
-./install-fabric.sh # TODO versions!
-
+/tmp/fabric/install-fabric.sh --fabric-version ${HLF_VERSION} binary
+mv ./bin/ccaas_builder ~/ccaas_builder
+mkdir -p /usr/local/bin
+mv ./bin/* /usr/local/bin
+mkdir -p /etc/hyperledger/fabric
+mv ./config /etc/hyperledger/fabric
 popd
 
-if [ "${USERNAME}" != "root" ]; then
-    chown -R ${USERNAME} /home/${USERNAME}/hyperledger
-fi
+mkdir -p /usr/src/hyperledger
+pushd /usr/src/hyperledger
+/tmp/fabric/install-fabric.sh --fabric-version ${HLF_VERSION} samples
+ln -s /usr/local/bin ./fabric-samples/bin && ln -s /etc/hyperledger/fabric/config ./fabric-samples/config
+popd
+
+rm -Rf /tmp/fabric
+
+# TODO install microfab?!
+#     && mkdir -p /opt/microfab/bin /opt/microfab/data \
+#     && chgrp -R root /opt/microfab/data \
+#     && chmod -R g=u /opt/microfab/data \
+#     && go build -o /opt/microfab/bin/microfabd cmd/microfabd/main.go \
+#     && cp -rf builders /opt/microfab/builders
+
+# TODO install ccaas builder

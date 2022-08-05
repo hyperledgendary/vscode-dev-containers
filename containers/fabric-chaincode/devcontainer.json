@@ -15,27 +15,26 @@
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "uname -a",
 
+	// Use 'postStartCommand' to start a Fabric environment? TBC
+	// "postStartCommand": ["microfabd"],
+
+	"containerEnv": {
+		"FABRIC_CFG_PATH": "/etc/hyperledger/fabric/config"
+	// 	"MICROFAB_CONFIG": "..."
+	},
+
 	// Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "vscode",
 
-	// TODO...
-	// - make it work with fabric test networks!
-	//   https://github.com/microsoft/vscode-dev-containers/blob/main/CONTRIBUTING.md#contributing-dev-container-definitions
-	// - use docker-in-docker feature instead?
-	//   https://github.com/microsoft/vscode-dev-containers/tree/main/script-library/docs
-	// - separate containers instead of including go node and java in one?
-	// - create "hyperledger-fabric" feature?
-	//   https://github.com/microsoft/dev-container-features-template#adding-your-own-features
 	"features": {
-		"docker-from-docker": {
-			"version": "latest",
-			"moby": true
-		},
 		"golang": "latest",
 		"node": {
 			"version": "lts",
 			"nodeGypDependencies": true
 		},
-		"java": "latest"
+		"java": "latest",
+		"hyperledgendary/vscode-dev-containers/hyperledger-fabric": {
+			"version": "latest"
+		}
 	}
 }
