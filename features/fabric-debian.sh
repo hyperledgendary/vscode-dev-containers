@@ -122,7 +122,7 @@ popd
 rm -Rf /tmp/hyperledger/fabric
 
 # Configure ccaas builder
-yq e 'del(.vm.endpoint) | .chaincode.externalBuilders += { "name": "ccaas_builder", "path": "/opt/hyperledger/fabric/ccaas_builder", "propagateEnvironment": [ "CHAINCODE_AS_A_SERVICE_BUILDER_CONFIG" ] }' -i ${FABRIC_CFG_PATH}/core.yaml
+yq e 'del(.vm.endpoint) | (.chaincode.externalBuilders[] | select(.name == "ccaas_builder") | .path) = "/opt/hyperledger/fabric/ccaas_builder"' -i ${FABRIC_CFG_PATH}/core.yaml
 
 # TODO install microfab!
 
