@@ -65,7 +65,7 @@ export DEBIAN_FRONTEND=noninteractive
 #     | sudo tee /etc/apt/sources.list.d/couchdb.list >/dev/null
 
 # Install required packages if missing (TBC!)
-check_packages curl ca-certificates apt-transport-https dirmngr gnupg2 findutils gcc gcc-c++ git gzip make python3 tar unzip xz
+check_packages curl ca-certificates apt-transport-https dirmngr gnupg2 findutils gcc git gzip make python3 tar unzip
 if ! type git > /dev/null 2>&1; then
     apt_get_update_if_needed
     apt-get -y install --no-install-recommends git
