@@ -1,0 +1,18 @@
+{
+  "features": [
+    {
+      "id": "hyperledger-fabric",
+      "name": "Hyperledger Fabric",
+      "documentationURL": "https://github.com/hyperledgendary/vscode-dev-containers/blob/main/docs/hyperledger-fabric-feature.md",
+      "options": {
+        "version": {
+          "type": "string",
+          "proposals": [ "latest", "lts", "2.2", "2.4" ],
+          "default": "lts",
+          "description": "Select or enter a Hyperledger Fabric version to install"
+        }
+      },
+      "include": ["ubuntu"]
+    }
+  ]
+}
