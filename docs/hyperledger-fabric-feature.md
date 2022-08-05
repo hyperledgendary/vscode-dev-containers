@@ -16,8 +16,8 @@ Or as a feature:
 
 ```json
 "features": {
-    "hyperledger-fabric": {
-        "version": "latest",
+    "hyperledgendary/vscode-dev-containers/hyperledger-fabric": {
+        "version": "latest"
     }
 }
 ```
@@ -36,7 +36,7 @@ You can use this script for your primary dev container by adding it to the `feat
 
 ```json
 "features": {
-    "hyperledger-fabric": {
+    "hyperledgendary/vscode-dev-containers/hyperledger-fabric": {
         "version": "latest",
     }
 }

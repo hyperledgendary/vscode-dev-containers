@@ -9,6 +9,8 @@ ENABLE_NONROOT=${1:-"true"}
 USERNAME=${2:-"automatic"}
 HLF_VERSION=${3:-"latest"}
 
+echo "FAB ${HLF_VERSION}"
+
 set -e
 
 if [ "$(id -u)" -ne 0 ]; then
