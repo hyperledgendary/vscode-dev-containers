@@ -36,6 +36,16 @@ elif [ "${USERNAME}" = "none" ] || ! id -u ${USERNAME} > /dev/null 2>&1; then
     USERNAME=root
 fi
 
+# Determine the appropriate Fabric version
+if [ "${HLF_VERSION}" = "latest" ]; then
+    HLF_VERSION=2.4.5
+elif [ "${HLF_VERSION}" = "lts" ]; then
+    HLF_VERSION=2.2.7
+elif [ "${HLF_VERSION:0:4}" != "2.2" ] && [ "${HLF_VERSION:0:4}" != "2.3" ] && [ "${HLF_VERSION:0:4}" != "2.4" ]; then
+    echo -e "Unsupported Fabric version ${HLF_VERSION}: only 2.2.x, 2.3.x, or 2.4.x versions are supported"
+    exit 1
+fi
+
 # Function to run apt-get if needed
 apt_get_update_if_needed()
 {
