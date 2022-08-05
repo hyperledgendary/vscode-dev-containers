@@ -17,7 +17,7 @@ jobs:
       - name: Publish dev container features
         uses: microsoft/publish-dev-container-features-action@main
         with:
-          path-to-features: '.'
+          path-to-features: 'features'
           
       - name: Get or Create Release at current tag
         uses: ncipollo/release-action@v1
