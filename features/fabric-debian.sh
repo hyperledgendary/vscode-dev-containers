@@ -95,14 +95,14 @@ mkdir -p /tmp/hyperledger/fabric
 curl -sSLo /tmp/hyperledger/fabric/install-fabric.sh https://raw.githubusercontent.com/hyperledger/fabric/main/scripts/install-fabric.sh && chmod +x /tmp/hyperledger/fabric/install-fabric.sh
 
 # Install Fabric binaries and config
-FABRIC_CFG_PATH=/opt/hyperledger/fabric/config
 pushd /tmp/hyperledger/fabric
 ./install-fabric.sh --fabric-version ${HLF_VERSION} binary
 mkdir -p /opt/hyperledger/fabric
 mv ./bin/ccaas_builder /opt/hyperledger/fabric
 mkdir -p /usr/local/bin
 mv ./bin/* /usr/local/bin
-mkdir -p /etc/hyperledger/fabric
+FABRIC_CFG_PATH=/etc/hyperledger/fabric/config
+mkdir -p ${FABRIC_CFG_PATH}
 mv ./config/* ${FABRIC_CFG_PATH}
 popd
 
