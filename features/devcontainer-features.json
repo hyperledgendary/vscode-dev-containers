@@ -12,6 +12,9 @@
           "description": "Select or enter a Hyperledger Fabric version to install"
         }
       },
+      "containerEnv": {
+        "FABRIC_CFG_PATH": "/etc/hyperledger/fabric/config"
+      },
       "include": ["ubuntu"]
     }
   ]

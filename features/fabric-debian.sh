@@ -81,12 +81,12 @@ if ! type git > /dev/null 2>&1; then
 fi
 
 # Install couchdb
-curl https://couchdb.apache.org/repo/keys.asc | gpg --dearmor | tee /usr/share/keyrings/couchdb-archive-keyring.gpg >/dev/null 2>&1
-source /etc/os-release
-echo "deb [signed-by=/usr/share/keyrings/couchdb-archive-keyring.gpg] https://apache.jfrog.io/artifactory/couchdb-deb/ ${VERSION_CODENAME} main" \
-    | tee /etc/apt/sources.list.d/couchdb.list >/dev/null
-apt_get_update_if_needed
-apt-get -y install --no-install-recommends couchdb
+# curl https://couchdb.apache.org/repo/keys.asc | gpg --dearmor | tee /usr/share/keyrings/couchdb-archive-keyring.gpg >/dev/null 2>&1
+# source /etc/os-release
+# echo "deb [signed-by=/usr/share/keyrings/couchdb-archive-keyring.gpg] https://apache.jfrog.io/artifactory/couchdb-deb/ ${VERSION_CODENAME} main" \
+#     | tee /etc/apt/sources.list.d/couchdb.list >/dev/null
+# apt_get_update_if_needed
+# apt-get -y install couchdb
 
 # Install yq
 curl -sSLo /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.23.1/yq_linux_${ARCHITECTURE} && chmod +x /usr/local/bin/yq
