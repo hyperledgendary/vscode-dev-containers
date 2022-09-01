@@ -141,6 +141,7 @@ fi
 groupadd microfab
 mkdir -p "/var/opt/hyperledger/microfab"
 chown root:microfab /var/opt/hyperledger/microfab
+chmod 2775 /var/opt/hyperledger/microfab
 
 if [ "${USERNAME}" != "root" ]; then
     chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}
