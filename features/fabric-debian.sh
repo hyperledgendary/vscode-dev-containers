@@ -44,9 +44,9 @@ fi
 
 # Determine the appropriate Fabric version
 if [ "${HLF_VERSION}" = "latest" ]; then
-    HLF_VERSION=2.4.5
+    HLF_VERSION=2.4.6
 elif [ "${HLF_VERSION}" = "lts" ]; then
-    HLF_VERSION=2.2.7
+    HLF_VERSION=2.2.8
 elif [ "${HLF_VERSION:0:4}" != "2.2" ] && [ "${HLF_VERSION:0:4}" != "2.3" ] && [ "${HLF_VERSION:0:4}" != "2.4" ]; then
     echo -e "Unsupported Fabric version ${HLF_VERSION}: only 2.2.x, 2.3.x, or 2.4.x versions are supported"
     exit 1
@@ -99,8 +99,13 @@ curl -sSLo /tmp/hyperledger/fabric/install-fabric.sh https://raw.githubuserconte
 pushd /tmp/hyperledger/fabric
 ./install-fabric.sh --fabric-version ${HLF_VERSION} binary
 mkdir -p /opt/hyperledger/fabric
-mv ./bin/ccaas_builder /opt/hyperledger/fabric
+if [ -d ./builders/ccaas ]; then
+    mv ./builders /opt/hyperledger/fabric
+fi
 mkdir -p /usr/local/bin
+if [ -d ./bin/ccaas_builder ]; then
+    rm -Rf ./bin/ccaas_builder
+fi
 mv ./bin/* /usr/local/bin
 FABRIC_CFG_PATH=/etc/hyperledger/fabric/config
 mkdir -p ${FABRIC_CFG_PATH}
@@ -123,12 +128,17 @@ popd
 rm -Rf /tmp/hyperledger/fabric
 
 # Configure ccaas builder
-yq e 'del(.vm.endpoint) | (.chaincode.externalBuilders[] | select(.name == "ccaas_builder") | .path) = "/opt/hyperledger/fabric/ccaas_builder"' -i ${FABRIC_CFG_PATH}/core.yaml
+yq e 'del(.vm.endpoint) | (.chaincode.externalBuilders[] | select(.name == "ccaas_builder") | .path) = "/opt/hyperledger/fabric/builders/ccaas"' -i ${FABRIC_CFG_PATH}/core.yaml
 
 # Install microfab
 curl --fail --silent --show-error -L "https://github.com/IBM-Blockchain/microfab/releases/download/v0.0.16/microfab-Linux-X64.tgz" -o "/tmp/microfab-Linux-X64.tgz"
 tar -C /usr/local/bin -xzf "/tmp/microfab-Linux-X64.tgz" microfabd
 rm "/tmp/microfab-Linux-X64.tgz"
+mkdir -p "/opt/hyperledger/microfab/builders"
+if [ -d /opt/hyperledger/fabric/builders/ccaas ]; then
+    ln -s /opt/hyperledger/fabric/builders/ccaas /opt/hyperledger/microfab/builders/ccaas
+fi
+mkdir -p "/var/hyperledger/microfab"
 
 if [ "${USERNAME}" != "root" ]; then
     chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}
