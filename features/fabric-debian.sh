@@ -73,19 +73,20 @@ check_packages() {
 
 export DEBIAN_FRONTEND=noninteractive
 
-# TODO Install couch?!
-# sudo apt update && sudo apt install -y curl apt-transport-https gnupg
-# curl https://couchdb.apache.org/repo/keys.asc | gpg --dearmor | sudo tee /usr/share/keyrings/couchdb-archive-keyring.gpg >/dev/null 2>&1
-# source /etc/os-release
-# echo "deb [signed-by=/usr/share/keyrings/couchdb-archive-keyring.gpg] https://apache.jfrog.io/artifactory/couchdb-deb/ ${VERSION_CODENAME} main" \
-#     | sudo tee /etc/apt/sources.list.d/couchdb.list >/dev/null
-
 # Install required packages if missing (TBC!)
 check_packages curl ca-certificates apt-transport-https dirmngr gnupg2 findutils gcc git gzip make python3 tar unzip
 if ! type git > /dev/null 2>&1; then
     apt_get_update_if_needed
     apt-get -y install --no-install-recommends git
 fi
+
+# Install couchdb
+curl https://couchdb.apache.org/repo/keys.asc | gpg --dearmor | tee /usr/share/keyrings/couchdb-archive-keyring.gpg >/dev/null 2>&1
+source /etc/os-release
+echo "deb [signed-by=/usr/share/keyrings/couchdb-archive-keyring.gpg] https://apache.jfrog.io/artifactory/couchdb-deb/ ${VERSION_CODENAME} main" \
+    | tee /etc/apt/sources.list.d/couchdb.list >/dev/null
+apt_get_update_if_needed
+apt-get -y install --no-install-recommends couchdb
 
 # Install yq
 curl -sSLo /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.23.1/yq_linux_${ARCHITECTURE} && chmod +x /usr/local/bin/yq
@@ -124,7 +125,10 @@ rm -Rf /tmp/hyperledger/fabric
 # Configure ccaas builder
 yq e 'del(.vm.endpoint) | (.chaincode.externalBuilders[] | select(.name == "ccaas_builder") | .path) = "/opt/hyperledger/fabric/ccaas_builder"' -i ${FABRIC_CFG_PATH}/core.yaml
 
-# TODO install microfab!
+# Install microfab
+curl --fail --silent --show-error -L "https://github.com/IBM-Blockchain/microfab/releases/download/v0.0.16/microfab-Linux-X64.tgz" -o "/tmp/microfab-Linux-X64.tgz"
+tar -C /usr/local/bin -xzf "/tmp/microfab-Linux-X64.tgz" microfabd
+rm "/tmp/microfab-Linux-X64.tgz"
 
 if [ "${USERNAME}" != "root" ]; then
     chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}
