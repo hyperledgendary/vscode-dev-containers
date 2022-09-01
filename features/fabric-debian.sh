@@ -138,8 +138,11 @@ mkdir -p "/opt/hyperledger/microfab/builders"
 if [ -d /opt/hyperledger/fabric/builders/ccaas ]; then
     ln -s /opt/hyperledger/fabric/builders/ccaas /opt/hyperledger/microfab/builders/ccaas
 fi
-mkdir -p "/var/hyperledger/microfab"
+groupadd microfab
+mkdir -p "/var/opt/hyperledger/microfab"
+chown root:microfab /var/opt/hyperledger/microfab
 
 if [ "${USERNAME}" != "root" ]; then
     chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}
+    adduser ${USERNAME} microfab
 fi

@@ -13,7 +13,9 @@
         }
       },
       "containerEnv": {
-        "FABRIC_CFG_PATH": "/etc/hyperledger/fabric/config"
+        "FABRIC_CFG_PATH": "/etc/hyperledger/fabric/config",
+        "MICROFAB_HOME": "/opt/hyperledger/microfab",
+    		"MICROFAB_CONFIG": "{\"directory\":\"/var/opt/hyperledger/microfab\",\"couchdb\":false}"
       },
       "include": ["ubuntu"]
     }
